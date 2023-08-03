@@ -1,14 +1,68 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:tt/screen/main_page.dart';
+import 'package:http/http.dart' as H;
 
+Map<String, dynamic> mapResponse1 = {};
+List listResponse1 = [];
+Map<String, dynamic> mapResponse2 = {};
+List listResponse2 = [];
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    fetchingDataFromAPI_1();
+    fetchingDataFromAPI_2();
+  }
+
+  Future<void> fetchingDataFromAPI_1() async {
+    try {
+      H.Response res = await H.get(Uri.parse(
+          'https://632017e19f82827dcf24a655.mockapi.io/api/programs'));
+      if (res.statusCode == 200) {
+        setState(() {
+          mapResponse1 = json.decode(res.body);
+          listResponse1 = mapResponse1['items'];
+          print('Done');
+        });
+      } else {
+        print("Retrieving Failed");
+      }
+    } catch (e) {
+      print("Error : $e");
+    }
+  }
+
+  Future<void> fetchingDataFromAPI_2() async {
+    try {
+      H.Response res = await H.get(
+          Uri.parse('https://632017e19f82827dcf24a655.mockapi.io/api/lessons'));
+      if (res.statusCode == 200) {
+        setState(() {
+          mapResponse2 = json.decode(res.body);
+          listResponse2 = mapResponse2['items'];
+          print('Done');
+        });
+      } else {
+        print("Retrieving Failed");
+      }
+    } catch (e) {
+      print("Error : $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,20 +73,19 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: "Assignment",),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+  const MyHomePage({super.key});
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _page = 1;
+  int _page = 0;
   late PageController pageController;
   @override
   void initState() {
@@ -49,18 +102,16 @@ class _MyHomePageState extends State<MyHomePage> {
   void navigationTapped(int page) {
     pageController.jumpToPage(page);
   }
-  void onPageChanged(int page){
+
+  void onPageChanged(int page) {
     setState(() {
-      _page=page;
+      _page = page;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
       body: PageView(
           controller: pageController,
           onPageChanged: onPageChanged,
@@ -71,13 +122,9 @@ class _MyHomePageState extends State<MyHomePage> {
             Text("Third"),
             Text("Fourth"),
             Text("Fifth"),
-          ]
-      ),
+          ]),
       bottomNavigationBar: BottomNavigationBar(
-      // backgroundColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
-        // selectedLabelStyle: TextStyle(fontSize: 8,color: Colors.blueAccent),
-        // unselectedLabelStyle: TextStyle(fontSize: 12,color: Colors.grey),
         items: [
           BottomNavigationBarItem(
             label: 'Home',
@@ -109,7 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const BottomNavigationBarItem(
             icon: CircleAvatar(
-              backgroundImage: NetworkImage("https://ynet-pic1.yit.co.il/picserver5/wcm_upload/2023/02/16/H1ueKos6j/shutterstock_2213684645.jpg"),
+              backgroundImage: NetworkImage(
+                  "https://ynet-pic1.yit.co.il/picserver5/wcm_upload/2023/02/16/H1ueKos6j/shutterstock_2213684645.jpg"),
             ),
             label: 'Profile',
           ),
